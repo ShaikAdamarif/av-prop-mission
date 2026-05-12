@@ -1,16 +1,21 @@
-// Shared Supabase admin client used by all serverless API routes.
-// Uses the SERVICE ROLE key — server-only, never exposed to the browser.
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 
-const url = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!url || !serviceKey) {
+if (!supabaseUrl || !supabaseServiceRoleKey) {
   console.warn('[supabase] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars');
 }
 
-const supabase = createClient(url || 'http://localhost', serviceKey || 'missing', {
-  auth: { persistSession: false, autoRefreshToken: false }
-});
+const supabase = createClient(
+  supabaseUrl,
+  supabaseServiceRoleKey,
+  {
+    realtime: {
+      transport: WebSocket
+    }
+  }
+);
 
-module.exports = { supabase };
+module.exports = supabase;
